@@ -1,0 +1,103 @@
+version: 2.0
+prefix: '&c[Christmas] &f'
+
+present-item:
+  name: '&e[&6&l!&e] &cPresent Merry Christmas &e[&6&l!&e]'
+  lore:
+    - '&7Whooo is it for?'
+    - '&7'
+    - '&7Open this gift that I send you &a%player%!'
+    - '&7Celebrate this christmas with me!'
+    - '&7'
+    - '&c&oMerry Christmas!'
+    - '&7'
+    - '&aRight click to open!'
+  material: PLAYER_HEAD
+  texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmEyYTAyMTI2OGI0YTA0N2JiODg5NGIxN2IxODA2YjhlOTdlNjA0MmMwMDEzMzZkYmI0MDY3NGNmNmM5MDZjNCJ9fX0=
+  amount: 1
+  enchantments:
+    - DURABILITY:1
+  flags:
+    - HIDE_ENCHANTS
+    - HIDE_ATTRIBUTES
+
+# The item that will be given to the player
+items-loot:
+  default:
+    diamond_s:
+      name: '&e[&6&l!&e] &cDiamond Sword &e[&6&l!&e]'
+      lore:
+        - '&cHo ho ho ho'
+        - '&7'
+        - '&7Merry Christmas!'
+        - '&7You obtained a diamond sword!'
+        - '&7'
+        - '&8Rarity: &7Common'
+        - '&8Type: &7Pickaxe'
+        - '&7'
+        - '&8Enchants:'
+        - ' &7- &aSharpness I'
+        - ' &7- &aUnbreaking I'
+        - '&7'
+        - '&aRight click to combat enemies!'
+      material: DIAMOND_SWORD
+      # 0.2 chance = 20%
+      chance: 0.2
+      amount: 1
+      enchantments:
+        - DAMAGE_ALL:1
+        - DURABILITY:1
+      flags:
+        - HIDE_ENCHANTS
+        - HIDE_ATTRIBUTES
+      commands:
+        enabled: true
+        commands:
+          - give %player% diamond 1
+    pickaxe_s:
+      name: '&e[&6&l!&e] &cDiamond Pickaxe &e[&6&l!&e]'
+      lore:
+        - '&cHo ho ho ho'
+        - '&7'
+        - '&7Merry Christmas!'
+        - '&7You obtained a diamond pickaxe!'
+        - '&7'
+        - '&8Rarity: &5Rare'
+        - '&8Type: &7Pickaxe'
+        - '&7'
+        - '&8Enchants:'
+        - ' &7- &aSharpness I'
+        - ' &7- &aUnbreaking I'
+        - '&7'
+        - '&aRight click to mine ores!'
+      material: DIAMOND_PICKAXE
+      chance: 0.8
+      amount: 1
+      enchantments:
+        - DAMAGE_ALL:1
+        - DURABILITY:1
+      flags:
+        - HIDE_ENCHANTS
+        - HIDE_ATTRIBUTES
+      commands:
+        enabled: true
+        commands:
+          - give %player% diamond 1
+
+#Settings
+cooldown-open-present: 5
+#List of particles available: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Particle.html
+particle-open-present: SNOW_SHOVEL
+#List of sounds available: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Sound.html
+sound-open-present: ENTITY_PLAYER_LEVELUP
+present-name-amor-stand: '&c¡Merry Christmas &f%player%&c!'
+
+#Messages to send to the player when he opens the present
+received-present-player: '%prefix%&aYou gave a present to &e%player%&a!'
+received-present-target: '%prefix%&aYou received a present from &e%player%&a!'
+opening-present: '%prefix%&eOpening present...'
+delay-present: '%prefix%&cYou need to wait &6%delay%&c seconds to give another present!'
+not-received-rewards: "%prefix%&cYou didn't get anything :(, try again!"
+yes-received-rewards: '%prefix%&aYou obtained %item%!'
+player-not-found: '%prefix%&cPlayer not found!'
+no-permission: "%prefix%&cYou don't have permission to execute this command!"

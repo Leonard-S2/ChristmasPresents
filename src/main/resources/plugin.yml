@@ -1,0 +1,12 @@
+main: org.com.github.leo_s.Christmas
+name: Christmas
+version: 1.0.2
+author: Leo_S
+api-version: 1.17
+description: 'Merry Christmas!'
+commands:
+  present:
+    aliases:
+      - present
+    description: Christmas command
+    usage: /present
