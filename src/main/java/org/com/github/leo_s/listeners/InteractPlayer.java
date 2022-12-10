@@ -115,7 +115,8 @@ public class InteractPlayer implements Listener{
 
     public void sendRandomPresent(Player p){
         //Get random item for chance
-        List<String> items_obtain = new ArrayList<>();
+        List<ItemStack> items_ = new ArrayList<>();
+        List<String> commands_ = new ArrayList<>();
         for (String key : config.getConfigurationSection("items-loot").getKeys(false)) {
             for (String key2 : config.getConfigurationSection("items-loot." + key).getKeys(false)) {
                 if (Math.random() <= config.getDouble("items-loot." + key + "." + key2 + ".chance")){
@@ -137,27 +138,38 @@ public class InteractPlayer implements Listener{
                         meta.addItemFlags(ItemFlag.valueOf(flag));
                     }
                     item.setItemMeta(meta);
-                    p.getInventory().addItem(item);
+                    items_.add(item);
 
                     if(config.getBoolean("items-loot." + key + "." + key2 + ".commands.enabled")){
                         for (String command : config.getStringList("items-loot." + key + "." + key2 + ".commands.commands")) {
-                            getServer().dispatchCommand(getServer().getConsoleSender(), command.replace("%player%", p.getName()));
+                            commands_.add(command.replace("%player%", p.getName()));
                         }
                     }
 
-                    items_obtain.add(convert(config.getString("items-loot." + key + "." + key2 + ".name")));
                 }
             }
         }
 
-        //Not Obtain any item
-        if(items_obtain.size() == 0) {
+        if(items_.size() == 0) {
             p.sendMessage(convert(config.getString("not-received-rewards")));
-        }else {
-            //Obtain items
-            for (String item : items_obtain) {
-                p.sendMessage(convert(config.getString("yes-received-rewards").replace("%item%", item)));
+            return;
+        }
+
+        if(items_.size() >= config.getInt("max-rewards-per-present")){
+            //Remove the maximum number of items from the list
+            for (int i = 0; i < items_.size() - config.getInt("max-rewards-per-present"); i++) {
+                items_.remove(i);
+                commands_.remove(i);
             }
+        }
+
+        for (ItemStack item : items_) {
+            p.getInventory().addItem(item);
+            p.sendMessage(convert(config.getString("yes-received-rewards").replace("%item%", item.getItemMeta().getDisplayName())));
+        }
+
+        for (String command : commands_) {
+            getServer().dispatchCommand(getServer().getConsoleSender(), command);
         }
     }
 

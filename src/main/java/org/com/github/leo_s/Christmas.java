@@ -96,5 +96,10 @@ public class Christmas extends JavaPlugin{
             config.set("interact-armorstand", "%prefix%&cYou can't open presents yet!");
             ConfigFile.getConfig().save();
         }
+
+        if(!old.contains("max-rewards-per-present:")){
+            config.set("max-rewards-per-present", 1);
+            ConfigFile.getConfig().save();
+        }
     }
 }

@@ -1,4 +1,4 @@
-version: 3.0
+version: 4.0
 prefix: '&c[Christmas] &f'
 
 present-item:
@@ -91,6 +91,7 @@ particle-open-present: SNOW_SHOVEL
 #List of sounds available: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Sound.html
 sound-open-present: ENTITY_PLAYER_LEVELUP
 present-name-amor-stand: '&c¡Merry Christmas &f%player%&c!'
+max-rewards-per-present: 1
 
 #Messages to send to the player when he opens the present
 received-present-player: '%prefix%&aYou gave a present to &e%player%&a!'
