@@ -2,6 +2,7 @@ package org.com.github.leo_s;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.com.github.leo_s.command.Command;
 import org.com.github.leo_s.listeners.BlockBreak;
@@ -19,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static org.com.github.leo_s.listeners.InteractPlayer.armorStandHashMap;
 import static org.com.github.leo_s.utils.files.Convert.convert;
 
 @SuppressWarnings("ConstantConditions")
@@ -54,6 +56,10 @@ public class Christmas extends JavaPlugin{
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+        //armorStandHashMap([World], [ArmorStand])
+        for (ArmorStand armorStand : armorStandHashMap.values()) {
+            armorStand.remove();
+        }
     }
     public void updateChecker(){
         try {
@@ -78,12 +84,16 @@ public class Christmas extends JavaPlugin{
         Path path = Paths.get(getDataFolder() + File.separator + "config.yml");
         String old = new String(Files.readAllBytes(path));
 
-        if(old.contains("cooldown-open-present:")){
+        if(!old.contains("cooldown-open-present:")){
             config.set("cooldown-open-present", 5);
             config.set("particle-open-present", "SNOW_SHOVEL");
             config.set("sound-open-present", "ENTITY_PLAYER_LEVELUP");
             config.set("present-name-amor-stand", "&c¡Merry Christmas &f%player%&c!");
             config.set("version", "2.0");
+            ConfigFile.getConfig().save();
+        }
+        if(!old.contains("interact-armorstand:")){
+            config.set("interact-armorstand", "%prefix%&cYou can't open presents yet!");
             ConfigFile.getConfig().save();
         }
     }

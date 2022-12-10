@@ -10,7 +10,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -20,92 +21,99 @@ import org.bukkit.util.EulerAngle;
 import org.com.github.leo_s.Christmas;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.bukkit.Bukkit.getServer;
 import static org.com.github.leo_s.Christmas.config;
 import static org.com.github.leo_s.utils.files.Convert.convert;
 
-@SuppressWarnings({"ConstantConditions", "DuplicatedCode"})
+@SuppressWarnings({"ConstantConditions", "DuplicatedCode", "deprecation"})
 public class InteractPlayer implements Listener{
     public static HashMap<Player, Integer> delay_interact = new HashMap<>();
+    public static HashMap<World, ArmorStand> armorStandHashMap = new HashMap<>();
 
     @EventHandler
-    public void onInteractPlayer(PlayerInteractAtEntityEvent e){
-        if(e.getRightClicked() instanceof Player p) {
+    public void onInteractArmorStand(PlayerArmorStandManipulateEvent e){
+        if(armorStandHashMap.containsKey(e.getRightClicked().getWorld())){
+            if(e.getRightClicked().getUniqueId().equals(armorStandHashMap.get(e.getRightClicked().getWorld()).getUniqueId())){
+                //send message
+                e.getPlayer().sendMessage(convert(config.getString("interact-armorstand")));
+                e.setCancelled(true);
+            }
+        }
+    }
+    @EventHandler
+    public void onInteractPlayer(PlayerInteractEntityEvent e){
+        if(e.getRightClicked() instanceof Player target) {
             // do something
-            if (e.getPlayer().getInventory().getItemInMainHand().getItemMeta() == null) return;
-            if (e.getPlayer().getInventory().getItemInMainHand().getItemMeta().getDisplayName() == null) return;
-            if (!e.getPlayer().getInventory().getItemInMainHand().getItemMeta().hasDisplayName()) return;
-            if (!delay_interact.containsKey(p)){
+            Player player = e.getPlayer();
+            if(player.getInventory().getItemInMainHand() == null) return;
+            if (player.getInventory().getItemInMainHand().getItemMeta() == null) return;
+            if (player.getInventory().getItemInMainHand().getItemMeta().getDisplayName() == null) return;
+            if (player.getInventory().getItemInMainHand().getItemMeta().getDisplayName().equals(
+                    config.getString("present-item.name").replace("&", "§"))) {
                 //10 seconds is equal to 5 seconds
-                delay_interact.put(p, (config.getInt("cooldown-open-present") * 2));
-
-                if (e.getPlayer().getInventory().getItemInMainHand().getItemMeta().getDisplayName().equals(
-                        config.getString("present-item.name").replace("&", "§"))){
-
-                    //If you have more than 1 item, subtract -1 from the quantity of that item
-                    if (e.getPlayer().getInventory().getItemInMainHand().getAmount() > 1) {
-                        e.getPlayer().getInventory().getItemInMainHand().setAmount(
-                                e.getPlayer().getInventory().getItemInMainHand().getAmount() - 1);
-                    } else {
-                        //If you have only 1 item, remove it
-                        e.getPlayer().getInventory().setItemInMainHand(new ItemStack(Material.AIR));
-                    }
-
-                    //Send a message to the player and the player who received the present
-                    e.getPlayer().sendMessage(convert(config.getString("received-present-player").replace("%player%", p.getName())));
-                    p.sendMessage(convert(convert(config.getString("received-present-target").replace("%player%", e.getPlayer().getName()))));
-                    p.sendMessage(convert(convert(config.getString("opening-present"))));
-
-                    //Start Animation to open the present
-                    executeAnimation(p);
-
-                    //Start the countdown
-                    BukkitRunnable runnable = new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            if (delay_interact.get(p) == 0){
-                                sendRandomPresent(p);
-                                p.playSound(p.getLocation(), Sound.valueOf(config.getString("sound-open-present")), 10, 1);
-
-                                delay_interact.remove(p);
-                                cancel();
-                            } else {
-
-                                //Prepare sound
-                                NoteBlock noteBlock = (NoteBlock) Material.NOTE_BLOCK.createBlockData();
-                                noteBlock.setInstrument(Instrument.PIANO);
-
-                                noteBlock.setNote(Note.natural(0, Note.Tone.A));
-                                noteBlock.setNote(Note.natural(0, Note.Tone.B));
-                                noteBlock.setNote(Note.natural(0, Note.Tone.C));
-                                noteBlock.setNote(Note.natural(0, Note.Tone.D));
-                                noteBlock.setNote(Note.natural(0, Note.Tone.E));
-                                noteBlock.setNote(Note.natural(0, Note.Tone.F));
-                                noteBlock.setNote(Note.natural(0, Note.Tone.G));
-                                noteBlock.setPowered(true);
-
-                                //Play sound
-                                p.playNote(p.getLocation(), noteBlock.getInstrument(), noteBlock.getNote());
-                                delay_interact.put(p, delay_interact.get(p) - 1);
-                            }
-                        }
-                    };
-                    runnable.runTaskTimer(Christmas.instance, 0, 10);
-                }
-            }else{
                 //Delay
-                e.getPlayer().sendMessage(convert(config.getString("delay-present").replace("%delay%", (delay_interact.get(p) / 2) + "")));
+                if(delay_interact.containsKey(player)) {
+                    player.sendMessage(convert(config.getString("delay-present").replace("%delay%", String.valueOf(delay_interact.get(player) / 2))));
+                    return;
+                }
+                delay_interact.put(player, (config.getInt("cooldown-open-present") * 2));
+
+                //If you have more than 1 item, subtract -1 from the quantity of that item
+                if (player.getInventory().getItemInMainHand().getAmount() > 1) {
+                    player.getInventory().getItemInMainHand().setAmount(
+                            player.getInventory().getItemInMainHand().getAmount() - 1);
+                } else {
+                    //If you have only 1 item, remove it
+                    player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
+                }
+
+                //Send a message to the player and the player who received the present
+                player.sendMessage(convert(config.getString("received-present-player").replace("%player%", target.getName())));
+                target.sendMessage(convert(convert(config.getString("received-present-target").replace("%player%", player.getName()))));
+                target.sendMessage(convert(convert(config.getString("opening-present"))));
+
+                //Start Animation to open the present
+                executeAnimation(target, player);
+
+                //Start the countdown
+                BukkitRunnable runnable = new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        if (delay_interact.get(player) == 0) {
+                            sendRandomPresent(target);
+                            target.playSound(target.getLocation(), Sound.valueOf(config.getString("sound-open-present")), 10, 1);
+
+                            delay_interact.remove(player);
+                            cancel();
+                        } else {
+
+                            //Prepare sound
+                            NoteBlock noteBlock = (NoteBlock) Material.NOTE_BLOCK.createBlockData();
+                            noteBlock.setInstrument(Instrument.PIANO);
+
+                            noteBlock.setNote(Note.natural(0, Note.Tone.A));
+                            noteBlock.setNote(Note.natural(0, Note.Tone.B));
+                            noteBlock.setNote(Note.natural(0, Note.Tone.C));
+                            noteBlock.setNote(Note.natural(0, Note.Tone.D));
+                            noteBlock.setNote(Note.natural(0, Note.Tone.E));
+                            noteBlock.setNote(Note.natural(0, Note.Tone.F));
+                            noteBlock.setNote(Note.natural(0, Note.Tone.G));
+                            noteBlock.setPowered(true);
+
+                            //Play sound
+                            target.playNote(target.getLocation(), noteBlock.getInstrument(), noteBlock.getNote());
+                            delay_interact.put(player, delay_interact.get(player) - 1);
+                        }
+                    }
+                };
+                runnable.runTaskTimer(Christmas.instance, 0, 10);
             }
         }
     }
 
     public void sendRandomPresent(Player p){
-
         //Get random item for chance
         List<String> items_obtain = new ArrayList<>();
         for (String key : config.getConfigurationSection("items-loot").getKeys(false)) {
@@ -153,7 +161,7 @@ public class InteractPlayer implements Listener{
         }
     }
 
-    public void executeAnimation(Player p){
+    public void executeAnimation(Player p, Player target){
         //Generate armor stand
         ArmorStand armorStand = (ArmorStand) p.getWorld().spawnEntity(p.getLocation().subtract(0, 1.3, 0), EntityType.ARMOR_STAND);
         armorStand.setCustomName(convert(config.getString("present-name-amor-stand").replace("%player%", p.getName())));
@@ -161,6 +169,8 @@ public class InteractPlayer implements Listener{
         armorStand.setGravity(false);
         armorStand.setInvulnerable(true);
         armorStand.setVisible(false);
+        armorStand.setRemoveWhenFarAway(false);
+
 
         //Configure the item in the armor stand
         Material material = Material.getMaterial(config.getString("present-item.material"));
@@ -182,12 +192,14 @@ public class InteractPlayer implements Listener{
 
         //Set item
         armorStand.setHelmet(item);
+        armorStandHashMap.put(armorStand.getWorld(), armorStand);
 
         //Animation
         BukkitRunnable runnable = new BukkitRunnable() {
             @Override
             public void run() {
-                if(!delay_interact.containsKey(p)){
+                if(!delay_interact.containsKey(target)){
+                    armorStandHashMap.remove(armorStand.getWorld());
                     armorStand.remove();
                     cancel();
                 }else{
@@ -208,6 +220,5 @@ public class InteractPlayer implements Listener{
             }
         };
         runnable.runTaskTimer(Christmas.instance, 0, 1);
-
     }
 }

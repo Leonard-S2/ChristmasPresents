@@ -1,4 +1,4 @@
-version: 2.0
+version: 3.0
 prefix: '&c[Christmas] &f'
 
 present-item:
@@ -101,3 +101,4 @@ not-received-rewards: "%prefix%&cYou didn't get anything :(, try again!"
 yes-received-rewards: '%prefix%&aYou obtained %item%!'
 player-not-found: '%prefix%&cPlayer not found!'
 no-permission: "%prefix%&cYou don't have permission to execute this command!"
+interact-armorstand: '%prefix%&cYou can't open presents yet!'

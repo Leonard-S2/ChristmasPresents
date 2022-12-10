@@ -4,6 +4,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.com.github.leo_s.command.list.CommandGive;
+import org.com.github.leo_s.command.list.CommandReload;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ public class Command implements CommandExecutor {
 
     public Command() {
         command_list.add(new CommandGive());
+        command_list.add(new CommandReload());
     }
     public List<ICommand> getCommand_list() {return command_list;}
 
